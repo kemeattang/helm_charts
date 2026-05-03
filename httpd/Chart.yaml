@@ -1,0 +1,6 @@
+apiVersion: v2
+name: httpd
+description: A Helm chart to deploy httpd in Kubernetes
+type: application
+version: v0.1.1
+appVersion: "2.4.54"

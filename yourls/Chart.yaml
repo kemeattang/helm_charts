@@ -1,0 +1,44 @@
+apiVersion: v2
+version: 5.2.12
+name: yourls
+description: Your Own URL Shortener (forked while waiting for https://github.com/YOURLS/charts/pull/215)
+appVersion: "1.9.1"
+type: application
+keywords:
+  - shortener
+  - url
+  - bitly
+home: https://yourls.org
+icon: https://yourls.org/images/yourls-logo.svg
+sources:
+  - https://github.com/YOURLS/YOURLS
+  - https://github.com/YOURLS/charts
+maintainers:
+  - name: YOURLS
+    url: https://github.com/YOURLS
+  - name: LeoColomb
+    url: https://github.com/LeoColomb
+kubeVersion: ^1.20.0-0
+dependencies:
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    version: ^2.1.2
+    tags:
+      - bitnami-common
+  - name: mariadb
+    repository: https://charts.bitnami.com/bitnami
+    version: ^11.3.4
+    condition: mariadb.enabled
+    tags:
+      - yourls-database
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Upstream Project
+      url: https://github.com/YOURLS/YOURLS
+  artifacthub.io/signKey: |
+    fingerprint: 6FCD850E18E4A4FF76DD1184A3A42A61961E423F
+    url: https://yourls.org/.well-known/openpgpkey/hu/6e4gbtp15q1znf3unweeducn7urty4mr
+  artifacthub.io/changes: |
+    - kind: added
+      description: Add diggest parameters to prepare bitnami/common v2

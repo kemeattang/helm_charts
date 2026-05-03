@@ -1,0 +1,73 @@
+{{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: batch/v1
+{{- else }}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: {{ include "cronjob.fullname" . }}
+  labels:
+    {{- include "cronjob.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronJob.schedule | quote}}
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ .Values.cronJob.activeDeadlineSeconds }}
+      backoffLimit: {{ .Values.cronJob.backoffLimit }}
+      template:
+        metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "cronjob.labels" . | nindent 12 }}
+        spec:
+          hostNetwork: {{ .Values.jobPod.hostNetwork }}
+          restartPolicy: {{ .Values.cronJob.restartPolicy }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "cronjob.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: {{ .Chart.Name }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+              {{- range .Values.jobPod.command }}
+              - {{ . | quote }}
+              {{- end }}
+              args:
+              {{- range .Values.jobPod.args }}
+              - {{ . | quote }}
+              {{- end }}
+              env:
+              {{- range $name, $value := .Values.jobPod.env }}{{- if not (empty $value) }}
+              - name: {{ $name | quote }}
+                value: {{ $value | quote }}
+              {{- end }}{{- end }}
+              {{- range $name, $value := .Values.jobPod.envFieldRefPath }}{{- if not (empty $value) }}
+              - name: {{ $name | quote }}
+                valueFrom:
+                  fieldRef:
+                    fieldPath: {{ $value }}
+              {{- end }}{{- end }}
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

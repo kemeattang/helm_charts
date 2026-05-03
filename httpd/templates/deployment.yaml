@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "httpd.fullname" . }}
+  labels:
+    {{- include "httpd.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "httpd.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "httpd.selectorLabels" . | nindent 8 }}
+        {{- include "httpd.additionalPodLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "httpd.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+        volumeMounts:
+        {{- if .Values.httpd.config.enabled }}
+        {{- range $key, $value := .Values.httpd.config.files }}
+        - name: config-{{ $key | replace "." "-" }}
+          mountPath: /usr/local/apache2/conf/{{ $key }}
+          subPath: {{ $key }}
+          readOnly: true
+        {{- end }}
+        {{- end }}
+        {{- if .Values.httpd.vHosts.enabled }}
+        {{- range $key, $value := .Values.httpd.vHosts.defaultHosts }}
+        - name: vhosts-{{ $key | replace "." "-" }}
+          mountPath: /usr/local/apache2/conf/extra/vHosts-{{ $key }}
+          subPath: {{ $key }}
+          readOnly: true
+        {{- end }}
+        {{- range $key, $value := .Values.httpd.vHosts.additionalHosts }}
+        - name: vhosts-{{ $key | replace "." "-" }}
+          mountPath: /usr/local/apache2/conf/extra/vHosts-{{ $key }}
+          subPath: {{ $key }}
+          readOnly: true
+        {{- end }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      volumes:
+      {{- $dot := . }} # https://github.com/helm/helm/issues/3684#issuecomment-427932707
+      {{- if .Values.httpd.config.enabled }}
+      {{- range $key, $value := .Values.httpd.config.files }}
+      - name: config-{{ $key | replace "." "-" }}
+        configMap:
+          name: {{ include "httpd.fullname" $dot }}-config
+      {{- end }}
+      {{- end }}
+      {{- if .Values.httpd.vHosts.enabled }}
+      {{- range $key, $value := .Values.httpd.vHosts.defaultHosts }}
+      - name: vhosts-{{ $key | replace "." "-" }}
+        configMap:
+          name: {{ include "httpd.fullname" $dot }}-vhosts
+      {{- end }}
+      {{- range $key, $value := .Values.httpd.vHosts.additionalHosts }}
+      - name: vhosts-{{ $key | replace "." "-" }}
+        configMap:
+          name: {{ include "httpd.fullname" $dot }}-vhosts
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

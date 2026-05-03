@@ -1,0 +1,16 @@
+{{- if .Values.httpd.config.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "httpd.fullname" . }}-config
+  labels:
+    {{- include "httpd.labels" . | nindent 4 }}
+data:
+{{- range $key, $val := .Values.httpd.config.files }}
+{{- if $val }}
+  {{ $key }}: |-
+{{ $val | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

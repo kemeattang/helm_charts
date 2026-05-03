@@ -1,0 +1,22 @@
+{{- if .Values.httpd.vHosts.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "httpd.fullname" . }}-vhosts
+  labels:
+    {{- include "httpd.labels" . | nindent 4 }}
+data:
+{{- range $key, $val := .Values.httpd.vHosts.defaultHosts }}
+{{- if $val }}
+  {{ $key }}: |-
+{{ $val | indent 4 }}
+{{- end }}
+{{- end }}
+{{- range $key, $val := .Values.httpd.vHosts.additionalHosts }}
+{{- if $val }}
+  {{ $key }}: |-
+{{ $val | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+CronJob {{ include "cronjob.fullname" . }} installed on a schedule of "{{ .Values.cronJob.schedule }}".
+
+Check status with
+```
+kubectl get cronjob -n {{ .Release.Namespace }} {{ include "cronjob.fullname" . }}
+```
+
+Get logs with
+```
+kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+```

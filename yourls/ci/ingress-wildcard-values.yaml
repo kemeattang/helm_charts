@@ -1,0 +1,17 @@
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  tls: true
+  extraHosts:
+    - name: "*.domain.tld"
+      path: /
+
+yourls:
+  password: "test-yourls"
+
+mariadb:
+  auth:
+    rootPassword: "test-root"
+    password: "test-user"

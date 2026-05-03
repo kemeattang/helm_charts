@@ -1,0 +1,46 @@
+image:
+  repository: alpine
+  pullPolicy: IfNotPresent
+  tag: "3.14"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+cronJob:
+  schedule: "*/15 * * * *"
+  restartPolicy: OnFailure
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+
+jobPod:
+  env:
+    AWS_REGION: us-west-2
+    STATSD_PORT: 8125
+  envFieldRefPath:
+    STATSD_HOST: status.hostIP
+  command: []
+  args: []
+  hostNetwork: true
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsUser: 1000
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
