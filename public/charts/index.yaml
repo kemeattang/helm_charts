@@ -3,24 +3,24 @@ entries:
   cronjob:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2026-05-05T19:03:41.988564-05:00"
+    created: "2026-05-05T19:05:08.398175-05:00"
     description: A Helm chart for deploying a CronJob.
     digest: 4a4838cc0c814ca253a54c62ef6d848da94bc9a3594b938a83f7b03ca6f6eb38
     name: cronjob
     type: application
     urls:
-    - https://helm-charts-two.vercel.app/cronjob-v0.1.0.tgz
+    - https://helm-charts-two.vercel.app/charts/cronjob-v0.1.0.tgz
     version: v0.1.0
   httpd:
   - apiVersion: v2
     appVersion: 2.4.54
-    created: "2026-05-05T19:03:41.989408-05:00"
+    created: "2026-05-05T19:05:08.399369-05:00"
     description: A Helm chart to deploy httpd in Kubernetes
     digest: 984f8483f38f67bfa8a1c4c964ebe6059195d9d12124530963a89db85a9d6616
     name: httpd
     type: application
     urls:
-    - https://helm-charts-two.vercel.app/httpd-v0.1.1.tgz
+    - https://helm-charts-two.vercel.app/charts/httpd-v0.1.1.tgz
     version: v0.1.1
   yourls:
   - annotations:
@@ -36,7 +36,7 @@ entries:
         url: https://yourls.org/.well-known/openpgpkey/hu/6e4gbtp15q1znf3unweeducn7urty4mr
     apiVersion: v2
     appVersion: 1.9.1
-    created: "2026-05-05T19:03:41.998074-05:00"
+    created: "2026-05-05T19:05:08.406106-05:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -69,6 +69,6 @@ entries:
     - https://github.com/YOURLS/charts
     type: application
     urls:
-    - https://helm-charts-two.vercel.app/yourls-5.2.12.tgz
+    - https://helm-charts-two.vercel.app/charts/yourls-5.2.12.tgz
     version: 5.2.12
-generated: "2026-05-05T19:03:41.987991-05:00"
+generated: "2026-05-05T19:05:08.396984-05:00"
