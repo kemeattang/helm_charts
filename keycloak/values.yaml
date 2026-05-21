@@ -1,0 +1,65 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.0.0"
+  pullPolicy: IfNotPresent
+
+admin:
+  username: admin
+  existingSecret: ""
+  passwordKey: admin-password
+  password: change-me
+
+keycloak:
+  command:
+    - start
+  hostname: keycloak.example.com
+  httpEnabled: true
+  proxyHeaders: xforwarded
+  hostnameStrict: false
+  healthEnabled: true
+  metricsEnabled: true
+  extraEnv: []
+
+database:
+  mode: embedded # external | embedded
+
+  external:
+    vendor: postgres
+    host: my-rds-or-azure-postgres.example.com
+    port: 5432
+    name: keycloak
+    username: keycloak
+    existingSecret: keycloak-db-secret
+    passwordKey: password
+
+  embedded:
+    image: postgres:16
+    database: keycloak
+    username: keycloak
+    password: change-me
+    storage: 20Gi
+    storageClassName: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  host: keycloak.example.com
+  tls:
+    enabled: false
+    secretName: keycloak-tls
+
+resources: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

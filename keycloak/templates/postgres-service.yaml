@@ -1,0 +1,14 @@
+{{- if eq .Values.database.mode "embedded" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.fullname" . }}-postgres
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "keycloak.name" . }}-postgres
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+{{- end }}

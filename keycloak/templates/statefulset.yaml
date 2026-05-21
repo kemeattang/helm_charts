@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+spec:
+  serviceName: {{ include "keycloak.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "keycloak.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      labels:
+        app.kubernetes.io/name: {{ include "keycloak.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keycloak
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+{{ toYaml .Values.keycloak.command | indent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: management
+              containerPort: 9000
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.admin.username | quote }}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.adminSecretName" . }}
+                  key: {{ .Values.admin.passwordKey }}
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ include "keycloak.dbHost" . }}:{{ include "keycloak.dbPort" . }}/{{ include "keycloak.dbName" . }}"
+            - name: KC_DB_USERNAME
+              value: {{ include "keycloak.dbUsername" . | quote }}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.dbSecretName" . }}
+                  key: {{ include "keycloak.dbPasswordKey" . }}
+            - name: KC_HOSTNAME
+              value: {{ .Values.keycloak.hostname | quote }}
+            - name: KC_HTTP_ENABLED
+              value: {{ .Values.keycloak.httpEnabled | quote }}
+            - name: KC_PROXY_HEADERS
+              value: {{ .Values.keycloak.proxyHeaders | quote }}
+            - name: KC_HOSTNAME_STRICT
+              value: {{ .Values.keycloak.hostnameStrict | quote }}
+            - name: KC_HEALTH_ENABLED
+              value: {{ .Values.keycloak.healthEnabled | quote }}
+            - name: KC_METRICS_ENABLED
+              value: {{ .Values.keycloak.metricsEnabled | quote }}
+{{- with .Values.keycloak.extraEnv }}
+{{ toYaml . | indent 12 }}
+{{- end }}
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: management
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: management
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: management
+            periodSeconds: 10
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
